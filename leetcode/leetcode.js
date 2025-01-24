@@ -3,21 +3,14 @@ import { DAILY_CODING_CHALLENGE_QUERY } from "./leetcodeQuery.js";
 import { MongoClient } from "mongodb";
 const router = express.Router();
 const LEETCODE_API_ENDPOINT = "https://leetcode.com/graphql";
+const uri = process.env.MONGO_URI;
+const client = new MongoClient(uri);
+const database = client.db("Leetcode");
+const dailies = database.collection("Daily");
 router.get("/", (req, res) => {
   const now = new Date().toISOString();
 
   res.send(JSON.stringify({ res: now }));
-});
-
-router.get("/:date", (req, res) => {
-  const date = new Date(req.params["date"]);
-
-  if (date.toString() == "Invalid Date") {
-    res.send({ msg: "bad date" });
-    return;
-  }
-
-  res.send({ date: date });
 });
 
 router.get("/dailyInsert", async (req, res) => {
@@ -45,8 +38,6 @@ router.get("/dailyInsert", async (req, res) => {
   };
   async function read() {
     try {
-      const database = client.db("Leetcode");
-      const dailies = database.collection("Daily");
       let insertFields;
       let resp = await fetchDailyCodingChallenge();
       let dailyObj = resp.data;
@@ -76,8 +67,6 @@ router.get("/dailyInsert", async (req, res) => {
     }
   }
 
-  const uri = process.env.MONGO_URI;
-  const client = new MongoClient(uri);
   try {
     await read();
   } catch (error) {
@@ -120,4 +109,27 @@ router.get("/all", async (req, res) => {
 
   res.send(data);
 });
+
+router.get("/:date", async (req, res) => {
+  const date = new Date(req.params["date"]);
+  console.log(date.getDate());
+  const endDate = new Date(req.params["date"]);
+  endDate.setDate(endDate.getDate() + 1);
+  console.log(endDate);
+  if (date.toString() == "Invalid Date") {
+    res.send({ msg: "bad date" });
+    return;
+  }
+  try {
+    let filter = { date: date };
+    const response = await dailies.findOne(filter, {
+      projection: { _id: 0 },
+    });
+    console.log(response);
+    res.send(response);
+  } catch (error) {
+    res.send(error);
+  }
+});
+
 export default router;
