@@ -1,5 +1,8 @@
 import express from "express";
-import { DAILY_CODING_CHALLENGE_QUERY } from "./leetcodeQuery.js";
+import {
+  DAILY_CODING_CHALLENGE_QUERY,
+  questionDetail,
+} from "./leetcodeQuery.js";
 import { MongoClient } from "mongodb";
 const router = express.Router();
 const LEETCODE_API_ENDPOINT = "https://leetcode.com/graphql";
@@ -109,6 +112,47 @@ router.get("/all", async (req, res) => {
 
   res.send(data);
 });
+// get specific question from titleslug
+router.get("/question/:date/:titleSlug", async (req, res) => {
+  const title = req.params["titleSlug"];
+  const date = new Date(req.params["date"]);
+  const fetchQuestion = async (title) => {
+    console.log(`Fetching daily coding challenge from LeetCode API.`);
+    const variables = { titleSlug: title };
+    const init = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: questionDetail,
+        variables,
+      }),
+    };
+    try {
+      const response = await fetch(LEETCODE_API_ENDPOINT, init);
+      return response.json();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const question = await fetchQuestion(title);
+  const qData = question.data;
+  console.log(qData.question);
+  console.log(title, date);
+  // const stringy = JSON.stringify(qData);
+  // const questionInfo = await JSON.parse(stringy);
+  const query = {
+    title: qData.question.title,
+    titleSlug: qData.question.titleSlug,
+    date: date,
+    difficulty: qData.question.difficulty,
+    topics: qData.question.topicTags,
+  };
+  dailies.insertOne(query);
+  console.log(query);
+  res.send(title);
+});
+
+// get question from just a date in YYYY-MM-DD format
 
 router.get("/:date", async (req, res) => {
   const date = new Date(req.params["date"]);

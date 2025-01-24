@@ -1,4 +1,4 @@
-const questionDetail = `
+export const questionDetail = `
 query questionDetail($titleSlug: String!) {
 languageList {
   id
@@ -42,44 +42,10 @@ topicTags {
     slug
     translatedName
   }
-similarQuestionList {
-    difficulty
-    titleSlug
-    title
-    translatedTitle
-    isPaidOnly
-  }
-mysqlSchemas
-  dataSchemas
-  frontendPreviews
   likes
   dislikes
-  isPaidOnly
-  status
-  canSeeQuestion
-  enableTestMode
-  metaData
-  enableRunCode
-  enableSubmit
-  enableDebugger
-  envInfo
-  isLiked
-nextChallenges {
-    difficulty
-    title
-    titleSlug
-    questionFrontendId
-  }
-libraryUrl
-  adminUrl
   hints
-  codeSnippets {
-    code
-    lang
-    langSlug
-  }
   exampleTestcaseList
-  hasFrontendPreview
 }
 }
 `;
