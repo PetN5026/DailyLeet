@@ -170,6 +170,10 @@ router.get("/:date", async (req, res) => {
       projection: { _id: 0 },
     });
     console.log(response);
+    if (!response) {
+      res.send({ msg: "no data" });
+      return;
+    }
     res.send(response);
   } catch (error) {
     res.send(error);
