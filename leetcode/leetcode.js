@@ -180,4 +180,33 @@ router.get("/:date", async (req, res) => {
   }
 });
 
+router.get("/git/:date", async (req, res) => {
+  const date = new Date(req.params["date"]);
+  console.log(date.getDate());
+  const endDate = new Date(req.params["date"]);
+  endDate.setDate(endDate.getDate() + 1);
+  console.log(endDate);
+  if (date.toString() == "Invalid Date") {
+    res.send({ msg: "bad date" });
+    return;
+  }
+  try {
+    let filter = { date: date };
+    const response = await dailies.findOne(filter, {
+      projection: { _id: 0 },
+    });
+    console.log(response);
+    if (!response) {
+      res.send({ msg: "no data" });
+      return;
+    }
+    const gitstring = `git commit --date "${
+      date.toISOString().split("T")[0]
+    }" -m "${response.title}"`;
+    response["gitstring"] = gitstring;
+    res.send(response);
+  } catch (error) {
+    res.send(error);
+  }
+});
 export default router;
